@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero fade-in">
+    <h1 class="slide-up">Bienvenido al proyecto</h1>
+    <p class="slide-up delay-1">Encuentra lo mejor en tecnología, ropa y accesorios.</p>
+    <br><br>
+    <a href="{{ url_for('catalog') }}" class="btn scale-in delay-2">Ver Catálogo</a>
+</section>
+
+<section class="featured fade-in delay-3">
+    <h2>Productos en Tendencia 📈<br></h2>
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card hover-animate">
+            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+            <h3>{{ product.name }}</h3>
+            <p>${{ product.price }}</p>
+            <div style="display:flex;justify-content:center;gap:8px;margin-top:8px;">
+                <a href="{{ url_for('product', product_id=product.id) }}" class="btn-small">Ver Producto</a>
+                <button class="btn-small add-cart-btn" data-id="{{ product.id }}">Añadir al carrito 🛒</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- toast compartido -->
+<div id="toast" style="position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:8px;background:var(--accent);color:white;display:none;z-index:9999;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.add-cart-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      try {
+        const res = await fetch(`/add_to_cart/${id}`);
+        if (res.ok) {
+          if (typeof updateCartCount === 'function') updateCartCount();
+          const toast = document.getElementById('toast');
+          toast.textContent = 'Producto agregado al carrito ✅';
+          toast.style.display = 'block';
+          setTimeout(()=> toast.style.display = 'none', 2000);
+        } else {
+          alert('No se pudo añadir el producto.');
+        }
+      } catch(e) { alert('Error de red.'); console.error(e); }
+    });
+  });
+});
+</script>
+{% endblock %}

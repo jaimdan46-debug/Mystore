@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="admin-dashboard fade-in">
+  <h2>Panel de Administración 👑</h2>
+  <p class="subtitle">Agrega, edita o elimina productos de tu tienda fácilmente.</p>
+
+  <!-- 🆕 FORMULARIO DE NUEVO PRODUCTO -->
+  <div class="admin-card">
+    <h3>➕ Agregar Nuevo Producto</h3>
+    <form id="product-form" method="POST" action="{{ url_for('add_product') }}" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" name="name" placeholder="Ej: Auriculares Gamer" required>
+      </div>
+
+      <div class="form-group">
+        <label>Categoría</label>
+        <input type="text" name="category" placeholder="Ej: Electrónica, Ropa..." required>
+      </div>
+
+      <div class="form-group">
+        <label>Precio</label>
+        <input type="number" step="0.01" name="price" placeholder="Ej: 1500" required>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea name="description" rows="3" placeholder="Describe tu producto..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Imagen del Producto</label>
+        <input type="file" name="image_file" accept="image/*" id="file-input" required>
+        <div class="preview">
+          <img id="preview-img" src="#" alt="Vista previa" style="display:none;">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Guardar Producto 💾</button>
+    </form>
+  </div>
+
+  <!-- 🧾 LISTA DE PRODUCTOS -->
+  <div class="admin-card fade-in delay-1">
+    <h3>📦 Productos Existentes</h3>
+    {% if products %}
+      <div class="product-table">
+        {% for p in products %}
+        <div class="product-item">
+          <img src="{{ url_for('static', filename='images/' + (p.image if p.image else 'placeholder.jpg')) }}" alt="{{ p.name }}">
+          <div class="info">
+            <h4>{{ p.name }}</h4>
+            <p><strong>${{ "%.2f"|format(p.price) }}</strong></p>
+            <p class="category">{{ p.category }}</p>
+          </div>
+          <div class="actions">
+            <a href="#" class="btn-edit">✏️ Editar</a>
+            <form method="POST" action="{{ url_for('delete_product', product_id=p.id) }}" onsubmit="return confirm('¿Seguro que quieres eliminar {{ p.name }}?')">
+              <button type="submit" class="btn-delete">🗑️ Eliminar</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="text-align:center; color:var(--muted);">Aún no hay productos registrados 🛒</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ====== ESTILOS ====== -->
+<style>
+.admin-dashboard {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+}
+.subtitle {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.admin-card {
+  background: var(--card);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  margin-bottom: 30px;
+}
+.form-group {
+  margin-bottom: 15px;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: transparent;
+  color: var(--text);
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-primary:hover {
+  background: #1d63d2;
+}
+.preview {
+  margin-top: 10px;
+  text-align: center;
+}
+.preview img {
+  max-width: 200px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.product-table {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.product-item {
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  padding: 15px;
+  text-align: center;
+  position: relative;
+}
+.product-item img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.category {
+  color: var(--muted);
+  font-size: 14px;
+}
+.actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-edit {
+  background: #ffb703;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+.btn-edit:hover {
+  background: #f29e02;
+}
+.btn-delete {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-delete:hover {
+  background: #e63946;
+}
+</style>
+
+<!-- ====== SCRIPT DE VISTA PREVIA ====== -->
+<script>
+document.getElementById('file-input').addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('preview-img');
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      preview.src = ev.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+{% endblock %}

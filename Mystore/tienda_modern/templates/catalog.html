@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="featured fade-in">
+    <h2><br>Catálogo de Productos 🛍️<br></h2>
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card hover-animate fade-in delay-1" data-name="{{ product.name }}">
+            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+            <h3>{{ product.name }}</h3>
+            <p>${{ product.price }}</p>
+
+            <!-- botón ahora usa fetch y data-id -->
+            <div style="display:flex;justify-content:center;gap:8px;margin-top:8px;">
+                <a href="{{ url_for('product', product_id=product.id) }}" class="btn-small">Ver Producto</a>
+
+                <button class="btn-small add-cart-btn" data-id="{{ product.id }}">
+                    Añadir al carrito 🛒
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- pequeño toast para confirmar acción -->
+<div id="toast" style="position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:8px;background:var(--accent);color:white;display:none;z-index:9999;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // attach add-to-cart handlers
+  document.querySelectorAll('.add-cart-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = btn.dataset.id;
+      try {
+        const res = await fetch(`/add_to_cart/${id}`);
+        if (res.ok) {
+          // actualizar contador (función en base.html)
+          if (typeof updateCartCount === 'function') updateCartCount();
+
+          // mostrar toast
+          const toast = document.getElementById('toast');
+          toast.textContent = 'Producto agregado al carrito ✅';
+          toast.style.display = 'block';
+          setTimeout(()=> toast.style.display = 'none', 2000);
+        } else {
+          alert('No se pudo añadir el producto.');
+        }
+      } catch(err) {
+        console.error(err);
+        alert('Error de red al añadir al carrito.');
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

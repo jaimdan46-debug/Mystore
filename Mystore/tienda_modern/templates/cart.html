@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="cart-section fade-in">
+  <h2><br>Carrito de Compras<br></h2><br>
+
+  {% if items %}
+  <table>
+    <tr>
+      <th>Producto</th>
+      <th>Precio</th>
+      <th>Cantidad</th>
+      <th>Total</th>
+      <th></th>
+    </tr>
+
+    {% for item in items %}
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>${{ item.price }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>${{ item.price * item.quantity }}</td>
+      <td>
+        <form action="{{ url_for('remove_from_cart', product_id=item.product_id) }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn-remove">Eliminar 🗑️</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+
+    <tr>
+      <td colspan="3"><strong>Total</strong></td>
+      <td><strong>${{ total }}</strong></td>
+      <td></td>
+    </tr>
+  </table>
+
+  <!-- 🧾 Formulario de pago -->
+  <div class="payment-form">
+    <h3>Método de Pago 💳</h3>
+    <form id="payment-form">
+      <div class="form-group">
+        <label for="nombre">Nombre en la Tarjeta</label>
+        <input type="text" id="nombre" required placeholder="Ej: Juan Pérez">
+      </div>
+
+      <div class="form-group">
+        <label for="tarjeta">Número de Tarjeta</label>
+        <input type="text" id="tarjeta" maxlength="19" pattern="\d{16}" required placeholder="1234 5678 9012 3456">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="exp">Expira</label>
+          <input type="text" id="exp" maxlength="5" placeholder="MM/AA" required>
+        </div>
+        <div class="form-group">
+          <label for="cvv">CVV</label>
+          <input type="password" id="cvv" maxlength="3" required placeholder="123">
+        </div>
+      </div>
+
+      <button type="button" class="btn-pay open-pay-modal">Pagar Ahora</button>
+    </form>
+  </div>
+
+  {% else %}
+  <p>Tu carrito está vacío 🛒</p>
+  {% endif %}
+</section>
+
+<!--  Estilos locales -->
+<style>
+.payment-form {
+  background: var(--card);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+  max-width: 600px;
+  margin: 40px auto;
+}
+.payment-form h3 { margin-bottom: 20px; color: var(--accent); }
+.form-group { margin-bottom: 15px; text-align:left; }
+.form-group label { display:block; margin-bottom:5px; font-weight:600; color:var(--muted); }
+.form-group input { width:100%; padding:10px; border:1px solid rgba(0,0,0,0.06); border-radius:8px; background:transparent; color:var(--text); }
+.form-row { display:flex; gap:15px; }
+.btn-pay:hover { transform: scale(1.02); }
+</style>
+
+<!-- ⚙️ Validación del formulario -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const payBtn = document.querySelector('.open-pay-modal');
+  if(!payBtn) return;
+
+  payBtn.addEventListener('click', () => {
+    const tarjeta = document.getElementById('tarjeta').value.trim();
+    const exp = document.getElementById('exp').value.trim();
+    const cvv = document.getElementById('cvv').value.trim();
+
+    if (tarjeta.length < 16) { alert("⚠️ Número de tarjeta inválido."); return; }
+    if (!/^\d{2}\/\d{2}$/.test(exp)) { alert("⚠️ Fecha de expiración inválida (usa formato MM/AA)."); return; }
+    if (cvv.length !== 3) { alert("⚠️ CVV inválido."); return; }
+
+    alert("Pago procesado correctamente.✅ ¡Gracias por tu compra!");
+    window.location.href = "{{ url_for('home') }}";
+  });
+});
+</script>
+{% endblock %}

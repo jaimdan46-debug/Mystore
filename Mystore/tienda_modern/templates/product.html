@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="product-detail fade-in">
+    <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+    <div class="product-info">
+        <h2>{{ product.name }}</h2>
+        <p class="price">${{ product.price }}</p>
+        <p>{{ product.description }}</p>
+        <br>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <a href="{{ url_for('add_to_cart', product_id=product.id) }}" id="add-link" class="btn">Agregar al Carrito 🛒</a>
+          <button id="add-async" class="btn">Agregar</button>
+        </div>
+    </div>
+</section>
+
+<div id="toast" style="position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:8px;background:var(--accent);color:white;display:none;z-index:9999;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const addBtn = document.getElementById('add-async');
+  const productId = "{ product.id }";
+  addBtn.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`/add_to_cart/${productId}`);
+      if (res.ok) {
+        if (typeof updateCartCount === 'function') updateCartCount();
+        const toast = document.getElementById('toast');
+        toast.textContent = 'Producto agregado al carrito ✅';
+        toast.style.display = 'block';
+        setTimeout(()=> toast.style.display = 'none', 2000);
+      } else {
+        alert('No se pudo añadir el producto.');
+      }
+    } catch(e) { alert('Error de red.'); console.error(e); }
+  });
+});
+</script>
+{% endblock %}

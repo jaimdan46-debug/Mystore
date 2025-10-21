@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto "Tienda en linea"</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ENCABEZADO -->
+<header>
+  <nav class="navbar">
+    <div class="logo">
+      <a href="{{ url_for('home') }}">Proyecto <strong>"Tienda en linea"</strong></a>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Inicio 🏠</a></li>
+      <li><a href="{{ url_for('catalog') }}">Catálogo 📄</a></li>
+      {% if current_user.is_authenticated %}
+        {% if current_user.is_admin %}
+          <li><a href="{{ url_for('admin_panel') }}">Admin 👑</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('cart') }}">Carrito 🛒</a></li>
+        <li><a href="{{ url_for('logout') }}">Cerrar sesión 🚪</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}">Iniciar Sesión 🔑</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</header>
+
+<!-- MENSAJES FLASH -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<!-- CONTENIDO PRINCIPAL -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- PIE DE PÁGINA -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>© Proyecto "Tienda" 2025 | Todos los derechos reservados a JDTL.</p>
+  </div>
+</footer>
+
+<script>
+  // Animaciones de entrada
+  document.addEventListener("DOMContentLoaded", () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
+  });
+</script>
+
+</body>
+</html>
